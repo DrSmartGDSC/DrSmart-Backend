@@ -1,5 +1,7 @@
 import os
-os.system('sh downloadModel.sh')
+
+if not os.path.isfile('model.h5'):
+        os.system('sh downloadModel.sh')
 
 from index import app
 # run 
