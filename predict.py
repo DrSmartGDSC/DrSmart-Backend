@@ -16,6 +16,8 @@ from tensorflow import keras
 class_names=['Acne and Rosacea Photos',
  'Actinic Keratosis Basal Cell Carcinoma and other Malignant Lesions',
  'Atopic Dermatitis Photos',
+ 'Cellulitis Impetigo and other Bacterial Infections',
+ 'Lupus and other Connective Tissue diseases',
  'Melanoma Skin Cancer Nevi and Moles',
  'Psoriasis pictures Lichen Planus and related diseases',
  'Tinea Ringworm Candidiasis and other Fungal Infections',
