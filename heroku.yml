@@ -1,0 +1,7 @@
+setup:
+  config:
+    MODEL_ID: $MODEL_ID
+
+build:
+  docker:
+    web: Dockerfile
