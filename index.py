@@ -32,7 +32,21 @@ def authenticate():
 # predict
 @app.post('/predict')
 def prediction():
-    authenticate()
+	
+    if 'Authorization' not in request.headers:
+        abort(403, 'Missing the Authorization header')
+
+    sp = request.headers['Authorization'].split(' ')
+    if len(sp) != 2:
+        abort(403, 'Invalid Authorization header')
+
+    token = sp[1]
+    payload = validate_access_token(token)
+
+    if not payload:
+        abort(403, 'Invalid access token')
+
+
     img = request.files.get('img')
     result = predict(img)
 
