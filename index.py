@@ -1,7 +1,6 @@
-from flask import Flask, request, jsonify
+from flask import request, jsonify
 from predict import predict
-
-app = Flask('SDD API')
+from models import app
 
 
 # endpoints
