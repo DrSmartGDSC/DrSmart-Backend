@@ -5,5 +5,5 @@ flask
 gunicorn
 psycopg2-binary
 SQLAlchemy
-flask_sqlalchemy
+Flask-SQLAlchemy
 pyjwt
