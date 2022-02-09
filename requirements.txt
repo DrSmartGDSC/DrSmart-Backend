@@ -17,7 +17,6 @@ google-auth-oauthlib==0.4.6
 google-pasta==0.2.0
 greenlet==1.1.2
 grpcio==1.43.0
-gunicorn==20.1.0
 h5py==3.6.0
 idna==3.3
 importlib-metadata==4.10.1
@@ -58,6 +57,7 @@ termcolor==1.1.0
 tf-estimator-nightly==2.8.0.dev2021122109
 typing-extensions==4.0.1
 urllib3==1.26.8
+waitress==2.0.0
 Werkzeug==2.0.3
 wrapt==1.13.3
 zipp==3.7.0

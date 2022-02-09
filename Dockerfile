@@ -10,4 +10,4 @@ RUN pip install -r requirements.txt
 
 EXPOSE $PORT
 
-CMD gunicorn --bind 0.0.0.0:$PORT run:app
+CMD waitress-serve --port=$PORT run:app
