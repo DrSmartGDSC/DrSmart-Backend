@@ -8,7 +8,7 @@ ACCESS_SECRET = os.environ.get('ACCESS_SECRET')
 def create_access_token(payload):
     payload['exp'] = datetime.now(tz=timezone.utc)
     
-    token = jwt.encode(payload,  ACCESS_SECRET, alogrithem='HS256')
+    token = jwt.encode(payload,  ACCESS_SECRET, algorithm='HS256')
     
 
     return token
