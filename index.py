@@ -13,17 +13,17 @@ init_db(app)
 # check the access token
 def authenticate():
     if 'Authorization' not in request.headers:
-        abort(403, 'Missing the Authorization header')
+        abort(401, 'Missing the Authorization header')
 
     sp = request.headers['Authorization'].split(' ')
     if len(sp) != 2:
-        abort(403, 'Invalid Authorization header')
+        abort(401, 'Invalid Authorization header')
 
     token = sp[1]
     payload = validate_access_token(token)
 
     if not payload:
-        abort(403, 'Invalid access token')
+        abort(401, 'Invalid access token')
 
     return payload
 
@@ -83,7 +83,7 @@ def login():
 
     success, token = user_login(email, password)
     if not success:
-        abort(403, 'Invalid Credentials')
+        abort(401, 'Invalid Credentials')
 
     return jsonify({
         'status': True,
@@ -114,9 +114,9 @@ def server_error_handeler(error):
     }), 500
 
 
-@app.errorhandler(403)
+@app.errorhandler(401)
 def forbidden_handeler(error):
     return jsonify({
         'status': False,
         'error': error.description
-    }), 403
+    }), 401
