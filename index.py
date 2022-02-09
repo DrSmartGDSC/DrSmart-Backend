@@ -6,15 +6,19 @@ from models import app
 # endpoints
 @app.post('/predict')
 def prediction():
-	img = request.files.get('img')
-	result = predict(img)
+    img = request.files.get('img')
+    result = predict(img)
 
-	response = {
-		'result': result
-	}
+    response = {
+        'status': True,
+        'data': {
+            'result': result,
+        },
+    }
 
-	return jsonify(response)
+    return jsonify(response)
+
 
 @app.get('/')
 def index():
-	return 'The API is running'
+    return 'The API is running'
