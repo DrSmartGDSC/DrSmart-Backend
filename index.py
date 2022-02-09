@@ -32,32 +32,26 @@ def authenticate():
 # predict
 @app.post('/predict')
 def prediction():
+	try:
+		token = request.headers['Authorization'].split(' ')[1]
+		payload = validate_access_token(token)
+		if payload == False:
+			raise Exception('invalid token')
+	except Exception as e:
+		print(str(e))
+		abort(403, 'failed to validate the access token')
 
-    if 'Authorization' not in request.headers:
-        abort(403, 'Missing the Authorization header')
+	img = request.files.get('img')
+	result = predict(img)
 
-    sp = request.headers['Authorization'].split(' ')
-    if len(sp) != 2:
-        abort(403, 'Invalid Authorization header')
-
-    token = sp[1]
-    payload = validate_access_token(token)
-
-    if not payload:
-        abort(403, 'Invalid access token')
-
-
-    img = request.files.get('img')
-    result = predict(img)
-
-    response = {
+	response = {
         'status': True,
         'data': {
             'result': result,
         },
     }
 
-    return jsonify(response)
+	return jsonify(response)
 
 
 # signup
@@ -113,7 +107,6 @@ def index():
 # error handeling
 @app.errorhandler(400)
 def bad_request_handeler(error):
-    print(error)
     return jsonify({
         'status': False,
         'error': error.description
@@ -122,7 +115,6 @@ def bad_request_handeler(error):
 
 @app.errorhandler(500)
 def server_error_handeler(error):
-    print(error)
     return jsonify({
         'status': False,
         'error': error.description
@@ -131,7 +123,6 @@ def server_error_handeler(error):
 
 @app.errorhandler(403)
 def forbidden_handeler(error):
-    print(error)
     return jsonify({
         'status': False,
         'error': error.description
