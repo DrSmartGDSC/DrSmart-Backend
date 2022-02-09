@@ -121,7 +121,7 @@ def bad_request_handeler(error):
 
 
 @app.errorhandler(500)
-def bad_request_handeler(error):
+def server_error_handeler(error):
     print(error)
     return jsonify({
         'status': False,
@@ -130,7 +130,7 @@ def bad_request_handeler(error):
 
 
 @app.errorhandler(403)
-def bad_request_handeler(error):
+def forbidden_handeler(error):
     print(error)
     return jsonify({
         'status': False,
