@@ -32,14 +32,7 @@ def authenticate():
 # predict
 @app.post('/predict')
 def prediction():
-	try:
-		token = request.headers['Authorization'].split(' ')[1]
-		payload = validate_access_token(token)
-		if payload == False:
-			raise Exception('invalid token')
-	except Exception as e:
-		print(str(e))
-		abort(403, 'failed to validate the access token')
+	authenticate()
 
 	img = request.files.get('img')
 	result = predict(img)
