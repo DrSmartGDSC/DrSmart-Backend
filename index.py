@@ -32,7 +32,7 @@ def authenticate():
 # predict
 @app.post('/predict')
 def prediction():
-	
+
     if 'Authorization' not in request.headers:
         abort(403, 'Missing the Authorization header')
 
@@ -135,4 +135,4 @@ def bad_request_handeler(error):
     return jsonify({
         'status': False,
         'error': error.description
-    }), 500
+    }), 403
