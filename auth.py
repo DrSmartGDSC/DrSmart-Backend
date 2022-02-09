@@ -15,7 +15,7 @@ def create_access_token(payload):
 
 def verify_access_token(token):
     try:
-        payload = jwt.decode(token, ACCESS_SECRET)
+        payload = jwt.decode(token, ACCESS_SECRET, algorithms=["HS256"])
     except Exception as e:
         print(str(e))
         return False
