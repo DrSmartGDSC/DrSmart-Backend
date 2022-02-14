@@ -13,15 +13,21 @@ from tensorflow.keras import models, layers
 import matplotlib.pyplot as plt
 from tensorflow import keras
 
-class_names = ['Acne and Rosacea Photos',
-               'Actinic Keratosis Basal Cell Carcinoma and other Malignant Lesions',
-               'Atopic Dermatitis Photos',
-               'Cellulitis Impetigo and other Bacterial Infections',
-               'Lupus and other Connective Tissue diseases',
-               'Melanoma Skin Cancer Nevi and Moles',
-               'Psoriasis pictures Lichen Planus and related diseases',
-               'Tinea Ringworm Candidiasis and other Fungal Infections',
-               'Urticaria Hives']
+class_names =['Acne and Rosacea Photos',
+ 'Actinic Keratosis Basal Cell Carcinoma and other Malignant Lesions',
+ 'Atopic Dermatitis Photos',
+ 'Cellulitis Impetigo and other Bacterial Infections',
+ 'Eczema Photos',
+ 'Lupus and other Connective Tissue diseases',
+ 'Melanoma Skin Cancer Nevi and Moles',
+ 'Nail Fungus and other Nail Disease',
+ 'Poison Ivy Photos and other Contact Dermatitis',
+ 'Psoriasis pictures Lichen Planus and related diseases',
+ 'Tinea Ringworm Candidiasis and other Fungal Infections',
+ 'Urticaria Hives',
+ 'Warts Molluscum and other Viral Infections']
+
+image_size=128
 
 skin_model = keras.models.load_model('skin_model.h5')  # Model Path .h5
 
@@ -29,7 +35,7 @@ skin_model = keras.models.load_model('skin_model.h5')  # Model Path .h5
 def predict_s(img):
     arr = plt.imread(img, 0)  # image path don't forget 0
 
-    n = tf.image.resize(arr, (224, 224))  # image size  don't play in it
+    n = tf.image.resize(arr, (image_size, image_size))  # image size  don't play in it
 
     img_array = tf.keras.preprocessing.image.img_to_array(n.numpy())
     img_array = tf.expand_dims(img_array, 0)
