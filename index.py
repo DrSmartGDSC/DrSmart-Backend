@@ -34,7 +34,7 @@ def authenticate():
 
 ## predict
 
-# sking
+# skin
 @app.post('/predict/skin')
 def predict_skin():
 	authenticate()
