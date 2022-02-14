@@ -13,40 +13,39 @@ from tensorflow.keras import models, layers
 import matplotlib.pyplot as plt
 from tensorflow import keras
 
-class_names=['Acne and Rosacea Photos',
- 'Actinic Keratosis Basal Cell Carcinoma and other Malignant Lesions',
- 'Atopic Dermatitis Photos',
- 'Cellulitis Impetigo and other Bacterial Infections',
- 'Lupus and other Connective Tissue diseases',
- 'Melanoma Skin Cancer Nevi and Moles',
- 'Psoriasis pictures Lichen Planus and related diseases',
- 'Tinea Ringworm Candidiasis and other Fungal Infections',
- 'Urticaria Hives']
+class_names = ['Acne and Rosacea Photos',
+               'Actinic Keratosis Basal Cell Carcinoma and other Malignant Lesions',
+               'Atopic Dermatitis Photos',
+               'Cellulitis Impetigo and other Bacterial Infections',
+               'Lupus and other Connective Tissue diseases',
+               'Melanoma Skin Cancer Nevi and Moles',
+               'Psoriasis pictures Lichen Planus and related diseases',
+               'Tinea Ringworm Candidiasis and other Fungal Infections',
+               'Urticaria Hives']
 
-model = keras.models.load_model('model.h5')# Model Path .h5
-
-def predict(img):
-	arr=plt.imread(img ,0)# image path don't forget 0
-
-	n = tf.image.resize(arr, (224,224))# image size  don't play in it
-
-	img_array = tf.keras.preprocessing.image.img_to_array(n.numpy())
-	img_array = tf.expand_dims(img_array, 0)
-
-	test_predict = model.predict(img_array)
-
-	prob_test = np.sort(test_predict,axis=1)
-	name_test = np.argsort(test_predict, axis=1)
-	prob_names = prob_test[:,-3:].tolist()
-	names = name_test[:,-3:].tolist()
-	names = [[class_names[i] for i in n] for n in names]
+skin_model = keras.models.load_model('skin_model.h5')  # Model Path .h5
 
 
-	result = []
+def predict_s(img):
+    arr = plt.imread(img, 0)  # image path don't forget 0
 
-	for i,n,p in zip(range(1,5),names,prob_names):
-		for clas, pp in zip(n[::-1],p[::-1]):
-			result.append({'name':clas, "confidence":pp*100})
- 
-	return result
+    n = tf.image.resize(arr, (224, 224))  # image size  don't play in it
 
+    img_array = tf.keras.preprocessing.image.img_to_array(n.numpy())
+    img_array = tf.expand_dims(img_array, 0)
+
+    test_predict = skin_model.predict(img_array)
+
+    prob_test = np.sort(test_predict, axis=1)
+    name_test = np.argsort(test_predict, axis=1)
+    prob_names = prob_test[:, -3:].tolist()
+    names = name_test[:, -3:].tolist()
+    names = [[class_names[i] for i in n] for n in names]
+
+    result = []
+
+    for i, n, p in zip(range(1, 5), names, prob_names):
+        for clas, pp in zip(n[::-1], p[::-1]):
+            result.append({'name': clas, "confidence": pp*100})
+
+    return result

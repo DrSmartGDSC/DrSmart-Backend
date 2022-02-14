@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, abort
-from predict import predict
+from predict import predict_s
 from models import init_db
 from auth import create_user, user_login, validate_access_token
 import os
@@ -28,14 +28,19 @@ def authenticate():
     return payload
 
 
-# endpoints
-# predict
-@app.post('/predict')
-def prediction():
+## endpoints
+
+
+
+## predict
+
+# sking
+@app.post('/predict/skin')
+def predict_skin():
 	authenticate()
 
 	img = request.files.get('img')
-	result = predict(img)
+	result = predict_s(img)
 
 	response = {
         'status': True,
@@ -46,6 +51,10 @@ def prediction():
 
 	return jsonify(response)
 
+
+
+
+## signup and login
 
 # signup
 @app.post('/signup')
@@ -71,7 +80,6 @@ def signup():
         'token': token,
     })
 
-
 # login
 @app.post('/login')
 def login():
@@ -92,6 +100,7 @@ def login():
     })
 
 
+# index
 @app.get('/')
 def index():
     return 'The API is running'
