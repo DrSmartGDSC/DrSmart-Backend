@@ -3,9 +3,12 @@ import jwt
 import os
 from datetime import datetime, timezone, timedelta
 from models import db, User
+import hashlib
 
 ACCESS_SECRET = os.environ.get('ACCESS_SECRET')
 
+def hashText(txt):
+    return hashlib.sha256(txt.encode()).hexdigest()
 
 def create_access_token(payload):
     payload['exp'] = datetime.now(tz=timezone.utc) + timedelta(days=30)
@@ -27,6 +30,9 @@ def validate_access_token(token):
 
 def create_user(user_data):
     try:
+
+        user_data['password'] = hashText(user_data['password'])
+
         db.session.add(User(
             **user_data,
             created=datetime.now(tz=timezone.utc)
@@ -47,7 +53,7 @@ def user_login(email, password):
     try:
         user = User.query.filter(
             User.email == email,
-            User.password == password
+            User.password == hashText(password)
         ).first()
 
         if user is None:

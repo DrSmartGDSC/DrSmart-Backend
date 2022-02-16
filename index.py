@@ -66,6 +66,9 @@ def signup():
     if None in [email, password, full_name]:
         abort(400, "fields missing")
 
+    if len(password) < 8:
+        abort(422, 'A password can not be shorter than 8 characters')
+
     success, token = create_user({
         'email': email,
         'password': password,
@@ -114,6 +117,19 @@ def bad_request_handeler(error):
         'error': error.description
     }), 400
 
+@app.errorhandler(401)
+def forbidden_handeler(error):
+    return jsonify({
+        'status': False,
+        'error': error.description
+    }), 401
+
+@app.errorhandler(422)
+def unprocessable_handeler(error):
+    return jsonify({
+        'status': False,
+        'error': error.description
+    }), 422
 
 @app.errorhandler(500)
 def server_error_handeler(error):
@@ -123,9 +139,3 @@ def server_error_handeler(error):
     }), 500
 
 
-@app.errorhandler(401)
-def forbidden_handeler(error):
-    return jsonify({
-        'status': False,
-        'error': error.description
-    }), 401
