@@ -1,3 +1,4 @@
+from cmath import log
 from flask import Flask, request, jsonify, abort
 from predict import predict_s
 from models import init_db
@@ -28,30 +29,47 @@ def authenticate():
     return payload
 
 
-## endpoints
+# endpoints
 
 
-
-## predict
+# predict
 
 # skin
-@app.post('/predict/skin')
+@app.post('/predict')
 def predict_skin():
-	authenticate()
+    authenticate()
 
-	img = request.files.get('img')
-	result = predict_s(img)
+    img = request.files.get('img')
+    tp = request.form.get('type')
 
-	response = {
+    print(tp)
+
+    if img is None:
+        abort(400, 'img is missing')
+    if tp is None:
+        abort(400, 'type is missing')
+
+    try:
+        tp = int(tp)
+    except Exception:
+        abort(400, f'invlaid type ({tp})')
+
+    result = None
+    if tp == 0: # skin
+        print('skin')
+        result = predict_s(img)
+
+    if result is None:
+        abort(400, f"type ({tp}) doesn't exist")
+
+    response = {
         'status': True,
         'data': {
             'result': result,
         },
     }
 
-	return jsonify(response)
-
-
+    return jsonify(response)
 
 
 ## signup and login
@@ -84,6 +102,8 @@ def signup():
     })
 
 # login
+
+
 @app.post('/login')
 def login():
     email = request.json.get('email', None)
@@ -117,12 +137,14 @@ def bad_request_handeler(error):
         'error': error.description
     }), 400
 
+
 @app.errorhandler(401)
 def forbidden_handeler(error):
     return jsonify({
         'status': False,
         'error': error.description
     }), 401
+
 
 @app.errorhandler(422)
 def unprocessable_handeler(error):
@@ -131,11 +153,10 @@ def unprocessable_handeler(error):
         'error': error.description
     }), 422
 
+
 @app.errorhandler(500)
 def server_error_handeler(error):
     return jsonify({
         'status': False,
         'error': error.description
     }), 500
-
-
