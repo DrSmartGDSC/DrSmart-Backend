@@ -18,6 +18,19 @@ class User(db.Model):
     def __repr__(self) -> str:
         return f"Patient: email:{self.email}"
 
+class SkinDisease(db.Model):
+    __tablename__ = 'skin_diseases'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(70), nullable=False)
+    text = db.Column(db.String(1400), nullable=False)
+
+    def __str__(self) -> str:
+        return f"Skin Disease: name:{self.name} id:{self.id}"
+
+    def __repr__(self) -> str:
+        return f"Skin Disease: name:{self.name} id:{self.id}"
+
 
 def init_db(app):
     db.init_app(app)

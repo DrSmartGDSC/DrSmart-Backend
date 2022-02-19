@@ -1,14 +1,18 @@
 from cmath import log
+from urllib import response
 from flask import Flask, request, jsonify, abort
-from predict import predict_s
-from models import init_db
+from models import init_db, SkinDisease
 from auth import create_user, user_login, validate_access_token
+from predict import predict_s, getSkinClasses
 import os
 
 app = Flask('SDD API')
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 init_db(app)
+getSkinClasses(app)
+
+
 
 
 # check the access token
@@ -56,7 +60,6 @@ def predict_skin():
 
     result = None
     if tp == 0: # skin
-        print('skin')
         result = predict_s(img)
 
     if result is None:
@@ -70,6 +73,37 @@ def predict_skin():
     }
 
     return jsonify(response)
+
+
+@app.get('/info')
+def info():
+    authenticate()
+    id = request.json.get('id')
+    tp = request.json.get('type')
+
+    if None in [id, tp]:
+        abort(400, 'fields missing')
+
+    result = None
+    if tp == 0: # skin
+        try:
+            result = SkinDisease.query.get(id).text
+        except Exception as e:
+            print(e)
+            abort(500, "couldn't get the disease info")
+
+    if result is None:
+        abort(400, f"type {tp} does't exist")
+
+    response = {
+        'status': True,
+        'data': {
+            'result': result,
+        }
+    }
+
+    return jsonify(response)
+
 
 
 ## signup and login
