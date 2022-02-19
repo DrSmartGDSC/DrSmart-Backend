@@ -37,8 +37,8 @@ skin_model = keras.models.load_model('skin_model.h5')  # Model Path .h5
 def getSkinClasses(app):
     global class_names
     with app.app_context():
-        class_names = {c.name: c.id for c in SkinDisease.query.all()}
-    print(class_names)
+        class_names = {c.name: c.id for c in SkinDisease.query.order_by(SkinDisease.id).all()}
+    print(list(class_names.keys()))
 
 
 def predict_s(img):
