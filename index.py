@@ -78,8 +78,8 @@ def predict_skin():
 @app.get('/info')
 def info():
     authenticate()
-    id = request.json.get('id')
-    tp = request.json.get('type')
+    id = request.form.get('id')
+    tp = request.form.get('type')
 
     if None in [id, tp]:
         abort(400, 'fields missing')
@@ -111,9 +111,9 @@ def info():
 # signup
 @app.post('/signup')
 def signup():
-    email = request.json.get('email', None)
-    password = request.json.get('password', None)
-    full_name = request.json.get('full_name', None)
+    email = request.form.get('email', None)
+    password = request.form.get('password', None)
+    full_name = request.form.get('full_name', None)
 
     if None in [email, password, full_name]:
         abort(400, "fields missing")
@@ -140,8 +140,8 @@ def signup():
 
 @app.post('/login')
 def login():
-    email = request.json.get('email', None)
-    password = request.json.get('password', None)
+    email = request.form.get('email', None)
+    password = request.form.get('password', None)
 
     if None in [email, password]:
         abort(400, "fields missing")
