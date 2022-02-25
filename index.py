@@ -46,8 +46,6 @@ def predict_skin():
     img = request.files.get('img')
     tp = request.form.get('type')
 
-    print(tp)
-
     if img is None:
         abort(400, 'img is missing')
     if tp is None:
@@ -61,6 +59,7 @@ def predict_skin():
     result = None
     if tp == 0: # skin
         result = predict_s(img)
+        result = list(filter(lambda x: round(x['confidence']) > 0, result))
 
     if result is None:
         abort(400, f"type ({tp}) doesn't exist")
