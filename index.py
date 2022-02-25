@@ -54,7 +54,7 @@ def predict_skin():
     try:
         tp = int(tp)
     except Exception:
-        abort(400, f'invlaid type ({tp})')
+        abort(400, f'invalid type ({tp})')
 
     result = None
     if tp == 0: # skin
