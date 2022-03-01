@@ -28,13 +28,13 @@ def authenticate():
 
     sp = request.headers['Authorization'].split(' ')
     if len(sp) != 2:
-        return err(200, 'Invalid Authorization header')
+        return err('Invalid Authorization header')
 
     token = sp[1]
     payload = validate_access_token(token)
 
     if not payload:
-        return err(200, 'Invalid access token')
+        return err('Invalid access token')
 
     return payload
 
@@ -53,14 +53,14 @@ def predict_skin():
     tp = request.form.get('type')
 
     if img is None:
-        return err(200, 'img is missing')
+        return err('img is missing')
     if tp is None:
-        return err(200, 'type is missing')
+        return err('type is missing')
 
     try:
         tp = int(tp)
     except Exception:
-        return err(200, f'invalid type ({tp})')
+        return err(f'invalid type ({tp})')
 
     result = None
     if tp == 0: # skin
@@ -68,7 +68,7 @@ def predict_skin():
         result = list(filter(lambda x: round(x['confidence']) > 0, result))
 
     if result is None:
-        return err(200, f"type ({tp}) doesn't exist")
+        return err(f"type ({tp}) doesn't exist")
 
     response = {
         'status': True,
@@ -87,7 +87,7 @@ def info():
     tp = request.form.get('type')
 
     if None in [id, tp]:
-        return err(200, 'fields missing')
+        return err('fields missing')
 
     result = None
     if tp == 0: # skin
@@ -98,7 +98,7 @@ def info():
             return err(500, "couldn't get the disease info")
 
     if result is None:
-        return err(200, f"type {tp} does't exist")
+        return err(f"type {tp} does't exist")
 
     response = {
         'status': True,
@@ -121,10 +121,10 @@ def signup():
     full_name = request.form.get('full_name', None)
 
     if None in [email, password, full_name]:
-        return err(200, "fields missing")
+        return err("fields missing")
 
     if len(password) < 8:
-        return err(200, 'A password can not be shorter than 8 characters')
+        return err('A password can not be shorter than 8 characters')
 
     success, token = create_user({
         'email': email,
@@ -132,7 +132,7 @@ def signup():
         'full_name': full_name
     })
     if not success:
-        return err(200, 'Failed to add the user. Make sure the email has not been used before')
+        return err('Failed to add the user. Make sure the email has not been used before')
 
     return jsonify({
         'status': True,
@@ -149,11 +149,11 @@ def login():
     password = request.form.get('password', None)
 
     if None in [email, password]:
-        return err(200, "fields missing")
+        return err("fields missing")
 
     success, token = user_login(email, password)
     if not success:
-        return err(200, 'Invalid Credentials')
+        return err('Invalid Credentials')
 
     return jsonify({
         'status': True,
