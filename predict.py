@@ -38,7 +38,6 @@ def getSkinClasses(app):
     global class_names
     with app.app_context():
         class_names = {c.name: c.id for c in SkinDisease.query.order_by(SkinDisease.id).all()}
-    print(list(class_names.keys()))
 
 
 def predict_s(img):
