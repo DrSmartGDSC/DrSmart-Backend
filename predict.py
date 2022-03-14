@@ -12,9 +12,9 @@ import tensorflow as tf
 from tensorflow.keras import models, layers
 import matplotlib.pyplot as plt
 from tensorflow import keras
-from models import SkinDisease
+from models import SkinDisease, LungDisease
 
-class_names = None
+skin_class_names = None
 # class_names =['Acne and Rosacea Photos',
 # 'Actinic Keratosis Basal Cell Carcinoma and other Malignant Lesions',
 # 'Atopic Dermatitis Photos',
@@ -28,16 +28,24 @@ class_names = None
 # 'Tinea Ringworm Candidiasis and other Fungal Infections',
 # 'Urticaria Hives',
 # 'Warts Molluscum and other Viral Infections']
+lung_class_names = None
 
 image_size = 128
 
 skin_model = keras.models.load_model('skin_model.h5')  # Model Path .h5
+lung_model = keras.models.load_model('lung_model.h5')  # Model Path .h5
 
 
 def getSkinClasses(app):
-    global class_names
+    global skin_class_names
     with app.app_context():
-        class_names = {c.name: c.id for c in SkinDisease.query.order_by(SkinDisease.id).all()}
+        skin_class_names = {c.name: c.id for c in SkinDisease.query.order_by(SkinDisease.id).all()}
+
+def getLungClasses(app):
+    global lung_class_names
+    with app.app_context():
+        lung_class_names = {c.name: c.id for c in LungDisease.query.order_by(LungDisease.id).all()}
+
 
 
 def predict_s(img):
@@ -50,6 +58,37 @@ def predict_s(img):
     img_array = tf.expand_dims(img_array, 0)
 
     test_predict = skin_model.predict(img_array)
+
+    prob_test = np.sort(test_predict, axis=1)
+    name_test = np.argsort(test_predict, axis=1)
+    prob_names = prob_test[:, -3:].tolist()
+    names = name_test[:, -3:].tolist()
+    names = [[list(skin_class_names.keys())[i] for i in n] for n in names]
+
+    result = []
+
+    for i, n, p in zip(range(1, 5), names, prob_names):
+        for clas, pp in zip(n[::-1], p[::-1]):
+            result.append({
+                'name': clas,
+                "confidence": pp*100,
+                'id': skin_class_names[clas]
+            })
+
+    return result
+
+def predict_l(img):
+    class_names = lung_class_names
+    
+    arr = plt.imread(img, 0)  # image path don't forget 0
+
+    # image size  don't play in it
+    n = tf.image.resize(arr, (224, 224))
+
+    img_array = tf.keras.preprocessing.image.img_to_array(n.numpy())
+    img_array = tf.expand_dims(img_array, 0)
+
+    test_predict = lung_model.predict(img_array)
 
     prob_test = np.sort(test_predict, axis=1)
     name_test = np.argsort(test_predict, axis=1)
@@ -68,3 +107,4 @@ def predict_s(img):
             })
 
     return result
+

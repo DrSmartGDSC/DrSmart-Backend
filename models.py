@@ -32,6 +32,21 @@ class SkinDisease(db.Model):
         return f"Skin Disease: name:{self.name} id:{self.id}"
 
 
+class LungDisease(db.Model):
+    __tablename__ = 'lung_diseases'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(70), nullable=False)
+    text = db.Column(db.String(1400), nullable=False)
+
+    def __str__(self) -> str:
+        return f"Lung Disease: name:{self.name} id:{self.id}"
+
+    def __repr__(self) -> str:
+        return f"Lung Disease: name:{self.name} id:{self.id}"
+
+
+
 def init_db(app):
     db.init_app(app)
     Migrate(app, db)

@@ -1,9 +1,9 @@
 from cmath import log
 from urllib import response
 from flask import Flask, request, jsonify
-from models import init_db, SkinDisease
+from models import init_db, SkinDisease, LungDisease
 from auth import create_user, user_login, validate_access_token
-from predict import predict_s, getSkinClasses
+from predict import predict_s, getSkinClasses, predict_l, getLungClasses
 import os
 
 app = Flask('SDD API')
@@ -11,8 +11,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 init_db(app)
 getSkinClasses(app)
-
-
+getLungClasses(app)
 
 
 def err(msg):
@@ -67,6 +66,10 @@ def predict_skin():
         result = predict_s(img)
         result = list(filter(lambda x: round(x['confidence']) > 0, result))
 
+    if tp == 1: # lung
+        result = predict_l(img)
+        result = list(filter(lambda x: round(x['confidence']) > 0, result))
+
     if result is None:
         return err(f"type ({tp}) doesn't exist")
 
@@ -89,6 +92,13 @@ def info():
     if None in [id, tp]:
         return err('fields missing')
 
+    try:
+        id = int(id)
+        tp = int(tp)
+    except Exception as e:
+        print(e)
+        return err('Invalid id or type.')
+
     result = None
     if tp == 0: # skin
         try:
@@ -96,6 +106,14 @@ def info():
         except Exception as e:
             print(e)
             return err(500, "couldn't get the disease info")
+
+    if tp == 1: # lung
+        try:
+            result = LungDisease.query.get(id).text
+        except Exception as e:
+            print(e)
+            return err("couldn't get the disease info")
+
 
     if result is None:
         return err(f"type {tp} does't exist")
@@ -108,7 +126,6 @@ def info():
     }
 
     return jsonify(response)
-
 
 
 ## signup and login
