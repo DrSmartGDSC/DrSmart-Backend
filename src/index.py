@@ -13,6 +13,8 @@ getSkinClasses(app)
 getLungClasses(app)
 
 # until
+
+
 def err(msg):
     return jsonify({
         'status': False,
@@ -20,6 +22,8 @@ def err(msg):
     })
 
 # check the access token
+
+
 def authenticate():
     if 'Authorization' not in request.headers:
         return err('Missing the Authorization header')
@@ -38,6 +42,8 @@ def authenticate():
 
 # Endpoints
 # skin
+
+
 @app.post('/predict')
 def predict_skin():
     authenticate()
@@ -56,11 +62,11 @@ def predict_skin():
         return err(f'invalid type ({tp})')
 
     result = None
-    if tp == 0: # skin
+    if tp == 0:  # skin
         result = predict_s(img)
         result = list(filter(lambda x: round(x['confidence']) > 0, result))
 
-    if tp == 1: # lung
+    if tp == 1:  # lung
         result = predict_l(img)
         result = list(filter(lambda x: round(x['confidence']) > 0, result))
 
@@ -94,20 +100,19 @@ def info():
         return err('Invalid id or type.')
 
     result = None
-    if tp == 0: # skin
+    if tp == 0:  # skin
         try:
             result = SkinDisease.query.get(id).text
         except Exception as e:
             print(e)
             return err(500, "couldn't get the disease info")
 
-    if tp == 1: # lung
+    if tp == 1:  # lung
         try:
             result = LungDisease.query.get(id).text
         except Exception as e:
             print(e)
             return err("couldn't get the disease info")
-
 
     if result is None:
         return err(f"type {tp} does't exist")
@@ -129,17 +134,41 @@ def signup():
     password = request.form.get('password', None)
     full_name = request.form.get('full_name', None)
 
+    is_doctor = request.form.get('is_doctor', 0)
+    is_doctor = is_doctor == '1'  # 1 == true, 0 == false
+
+    field_id = request.form.get('field_id', None)
+
     if None in [email, password, full_name]:
         return err("fields missing")
+
+    if is_doctor and field_id is None:
+        return err('A doctor without a field')
+
+    if is_doctor:
+        try:
+            field_id = int(field_id)
+        except Exception:
+            return err('Invalid field id')
 
     if len(password) < 8:
         return err('A password can not be shorter than 8 characters')
 
-    success, token = create_user({
-        'email': email,
-        'password': password,
-        'full_name': full_name
-    })
+    if is_doctor:
+        success, token = create_user({
+            'email': email,
+            'password': password,
+            'full_name': full_name,
+            'is_doctor': is_doctor,
+            "field_id": field_id
+        })
+    else:
+        success, token = create_user({
+            'email': email,
+            'password': password,
+            'full_name': full_name
+        })
+
     if not success:
         return err('Failed to add the user. Make sure the email has not been used before')
 
@@ -150,6 +179,7 @@ def signup():
     })
 
 # login
+
 @app.post('/login')
 def login():
     email = request.form.get('email', None)
@@ -173,6 +203,7 @@ def login():
 @app.get('/')
 def index():
     return 'The API is running'
+
 
 @app.errorhandler(500)
 def server_error_handeler(error):

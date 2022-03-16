@@ -32,8 +32,8 @@ lung_class_names = None
 
 image_size = 128
 
-skin_model = keras.models.load_model('../skin_model.h5')  # Model Path .h5
-lung_model = keras.models.load_model('../lung_model.h5')  # Model Path .h5
+skin_model = keras.models.load_model('skin_model.h5')  # Model Path .h5
+lung_model = keras.models.load_model('lung_model.h5')  # Model Path .h5
 
 
 def getSkinClasses(app):
