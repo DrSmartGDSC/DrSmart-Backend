@@ -1,11 +1,10 @@
-from cmath import log
-from urllib import response
 from flask import Flask, request, jsonify
 from models import init_db, SkinDisease, LungDisease
 from auth import create_user, user_login, validate_access_token
 from predict import predict_s, getSkinClasses, predict_l, getLungClasses
 import os
 
+# Config
 app = Flask('SDD API')
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -13,7 +12,7 @@ init_db(app)
 getSkinClasses(app)
 getLungClasses(app)
 
-
+# until
 def err(msg):
     return jsonify({
         'status': False,
@@ -37,12 +36,7 @@ def authenticate():
 
     return payload
 
-
-# endpoints
-
-
-# predict
-
+# Endpoints
 # skin
 @app.post('/predict')
 def predict_skin():
@@ -128,8 +122,6 @@ def info():
     return jsonify(response)
 
 
-## signup and login
-
 # signup
 @app.post('/signup')
 def signup():
@@ -158,8 +150,6 @@ def signup():
     })
 
 # login
-
-
 @app.post('/login')
 def login():
     email = request.form.get('email', None)
@@ -179,7 +169,7 @@ def login():
     })
 
 
-# index
+# root
 @app.get('/')
 def index():
     return 'The API is running'
