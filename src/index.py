@@ -153,7 +153,7 @@ def signup():
         return abort(400, 'A password can not be shorter than 8 characters')
 
     if is_doctor:
-        success, token = create_user({
+        success, token, user = create_user({
             'email': email,
             'password': password,
             'full_name': full_name,
@@ -161,7 +161,7 @@ def signup():
             "field_id": field_id
         })
     else:
-        success, token = create_user({
+        success, token, user = create_user({
             'email': email,
             'password': password,
             'full_name': full_name
@@ -174,6 +174,7 @@ def signup():
         'status': True,
         'email': email,
         'token': token,
+        'user': user
     })
 
 # login
@@ -266,6 +267,15 @@ def create_post():
 
 @app.get('/posts')
 def get_posts():
+    payload = authenticate()
+    is_doctor = payload['is_doctor']
+    field_id = payload['field_id']
+
+    limit = request.form.get('limit', 10)
+    page = request.form.get('page', 1)
+
+    posts = Post.query.filter(Post.field_id == field_id).limit(limit)
+
     pass
 
 # get a single post

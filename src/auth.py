@@ -35,11 +35,12 @@ def create_user(user_data):
 
         user_data['password'] = hashText(user_data['password'])
 
-        db.session.add(User(
+        user = User(
             **user_data,
             created=datetime.now(tz=timezone.utc)
-        ))
-        
+        )
+        db.session.add(user)
+
         token = create_access_token({
             'email': user_data['email'],
             'user_id': user.id,
@@ -47,12 +48,17 @@ def create_user(user_data):
             'is_doctor': user.is_doctor
         })
 
+        u = dict()
+        u['is_doctor'] = user.is_doctor
+        u['field_id'] = user.field_id
+        u['name'] = user.full_name
+
         db.session.commit()
-        return True, token
+        return True, token, u
     except Exception as e:
         print(str(e))
         db.session.rollback()
-        return False, ''
+        return False, '', None
     finally:
         db.session.close()
 
@@ -84,6 +90,6 @@ def user_login(email, password):
     except Exception as e:
         print(str(e))
         db.session.rollback()
-        return False, ''
+        return False, '', None
     finally:
         db.session.close()
