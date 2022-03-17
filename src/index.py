@@ -17,6 +17,14 @@ with app.app_context():
     FIELDS = list(
         map(lambda x: {'name': x.name, 'id': x.id}, Field.query.all()))
 
+
+def row2dict(row):
+    d = {}
+    for column in row.__table__.columns:
+        d[column.name] = getattr(row, column.name)
+
+    return d
+
 # check the access token
 
 
@@ -270,19 +278,33 @@ def get_posts():
     payload = authenticate()
     is_doctor = payload['is_doctor']
     field_id = payload['field_id']
+    user_id = payload['user_id']
 
     limit = request.form.get('limit', 10)
     page = request.form.get('page', 1)
 
-    posts = Post.query.filter(Post.field_id == field_id).limit(limit)
+    if is_doctor:
+        posts = Post.query.order_by(Post.id.desc()).filter(
+            Post.field_id == field_id).paginate(page, limit, error_out=False)
+    else:
+        posts = Post.query.order_by(Post.id.desc()).filter(
+            Post.user_id == user_id).paginate(page, limit, error_out=False)
 
-    pass
+    posts = list(
+        map(lambda x: {'title': x.title, 'desc': x.desc, 'field': x.field.name}, posts.items))
+    return {
+        'status': True,
+        'data': {
+            'posts': posts
+        }
+    }
 
 # get a single post
 
 
 @app.get('/posts/<post_id>')
 def get_post(post_id):
+    # TODO
     pass
 
 # create a comment
@@ -290,6 +312,7 @@ def get_post(post_id):
 
 @app.post('/posts/<post_id>/comments')
 def create_comment(post_id):
+    # TODO
     pass
 
 # get the comments of a post
@@ -297,6 +320,7 @@ def create_comment(post_id):
 
 @app.get('/posts/<post_id>/comments')
 def get_comments(post_id):
+    # TODO
     pass
 
 # close a post (got an answer)
@@ -304,6 +328,7 @@ def get_comments(post_id):
 
 @app.post('/posts/<post_id>/end')
 def end_post(post_id):
+    # TODO
     pass
 ## POSTS AREA END ##
 
