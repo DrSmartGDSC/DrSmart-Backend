@@ -188,7 +188,7 @@ def login():
     if None in [email, password]:
         return err("fields missing")
 
-    success, token = user_login(email, password)
+    success, token, user = user_login(email, password)
     if not success:
         return err('Invalid Credentials')
 
@@ -196,6 +196,7 @@ def login():
         'status': True,
         'email': email,
         'token': token,
+        'user': user
     })
 
 

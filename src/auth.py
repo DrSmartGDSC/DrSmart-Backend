@@ -59,10 +59,15 @@ def user_login(email, password):
         if user is None:
             raise Exception('user not found')
 
+        u = dict()
+        u['is_doctor'] = user.is_doctor
+        u['field_id'] = user.field_id
+        u['name'] = user.full_name
+
         token = create_access_token({'email': email})
         db.session.commit()
 
-        return True, token
+        return True, token, u
     except Exception as e:
         print(str(e))
         db.session.rollback()
