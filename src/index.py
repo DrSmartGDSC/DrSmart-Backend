@@ -18,13 +18,6 @@ with app.app_context():
         map(lambda x: {'name': x.name, 'id': x.id}, Field.query.all()))
 
 
-def row2dict(row):
-    d = {}
-    for column in row.__table__.columns:
-        d[column.name] = getattr(row, column.name)
-
-    return d
-
 # check the access token
 
 
@@ -291,7 +284,7 @@ def get_posts():
             Post.user_id == user_id).paginate(page, limit, error_out=False)
 
     posts = list(
-        map(lambda x: {'title': x.title, 'desc': x.desc, 'field': x.field.name}, posts.items))
+        map(lambda x: {'post_id': x.id, 'title': x.title, 'desc': x.desc, 'field': x.field.name}, posts.items))
     return {
         'status': True,
         'data': {
@@ -304,8 +297,32 @@ def get_posts():
 
 @app.get('/posts/<post_id>')
 def get_post(post_id):
-    # TODO
-    pass
+    authenticate()
+    try:
+        post = Post.query.get(post_id)
+        if post is None:
+            raise Exception('post not found')
+    except Exception as e:
+        print(str(e))
+        abort(404, 'post not found')
+
+    return {
+        'status': True,
+        'data': {
+            'post': {
+                'title': post.title,
+                'desc': post.desc,
+                'img': post.img,
+                'user_id': post.user_id,
+                'field_id': post.field_id,
+                'field': post.field.name,
+                'user': {
+                    'name': post.user.full_name,
+                    'email': post.user.email
+                }
+            }
+        }
+    }
 
 # create a comment
 
@@ -349,6 +366,14 @@ def bad_request_handeler(error):
 
 
 @app.errorhandler(401)
+def forbidden_handeler(error):
+    return jsonify({
+        'status': False,
+        'error': error.description
+    }), 200
+
+
+@app.errorhandler(404)
 def forbidden_handeler(error):
     return jsonify({
         'status': False,
