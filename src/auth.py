@@ -7,8 +7,10 @@ import hashlib
 
 ACCESS_SECRET = os.environ.get('ACCESS_SECRET')
 
+
 def hashText(txt):
     return hashlib.sha256(txt.encode()).hexdigest()
+
 
 def create_access_token(payload):
     payload['exp'] = datetime.now(tz=timezone.utc) + timedelta(days=30)
@@ -37,7 +39,13 @@ def create_user(user_data):
             **user_data,
             created=datetime.now(tz=timezone.utc)
         ))
-        token = create_access_token({'email': user_data['email']})
+        
+        token = create_access_token({
+            'email': user_data['email'],
+            'user_id': user.id,
+            'field_id': user.field_id,
+            'is_doctor': user.is_doctor
+        })
 
         db.session.commit()
         return True, token
@@ -64,7 +72,12 @@ def user_login(email, password):
         u['field_id'] = user.field_id
         u['name'] = user.full_name
 
-        token = create_access_token({'email': email})
+        token = create_access_token({
+            'email': email,
+            'user_id': user.id,
+            'field_id': user.field_id,
+            'is_doctor': user.is_doctor
+        })
         db.session.commit()
 
         return True, token, u

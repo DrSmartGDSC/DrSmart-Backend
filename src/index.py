@@ -1,8 +1,9 @@
-from flask import Flask, request, jsonify
-from models import init_db, SkinDisease, LungDisease
+from flask import Flask, request, jsonify, abort
+from models import *
 from auth import create_user, user_login, validate_access_token
 from predict import predict_s, getSkinClasses, predict_l, getLungClasses
 import os
+import base64
 
 # Config
 app = Flask('SDD API')
@@ -12,31 +13,26 @@ init_db(app)
 getSkinClasses(app)
 getLungClasses(app)
 
-# until
-
-
-def err(msg):
-    return jsonify({
-        'status': False,
-        'error': msg
-    })
+with app.app_context():
+    FIELDS = list(
+        map(lambda x: {'name': x.name, 'id': x.id}, Field.query.all()))
 
 # check the access token
 
 
 def authenticate():
     if 'Authorization' not in request.headers:
-        return err('Missing the Authorization header')
+        return abort(400, 'Missing the Authorization header')
 
     sp = request.headers['Authorization'].split(' ')
     if len(sp) != 2:
-        return err('Invalid Authorization header')
+        return abort(401, 'Invalid Authorization header')
 
     token = sp[1]
     payload = validate_access_token(token)
 
     if not payload:
-        return err('Invalid access token')
+        return abort(401, 'Invalid access token')
 
     return payload
 
@@ -52,14 +48,14 @@ def predict_skin():
     tp = request.form.get('type')
 
     if img is None:
-        return err('img is missing')
+        return abort(400, 'img is missing')
     if tp is None:
-        return err('type is missing')
+        return abort(400, 'type is missing')
 
     try:
         tp = int(tp)
     except Exception:
-        return err(f'invalid type ({tp})')
+        return abort(400, f'invalid type ({tp})')
 
     result = None
     if tp == 0:  # skin
@@ -71,7 +67,7 @@ def predict_skin():
         result = list(filter(lambda x: round(x['confidence']) > 0, result))
 
     if result is None:
-        return err(f"type ({tp}) doesn't exist")
+        return abort(400, f"type ({tp}) doesn't exist")
 
     response = {
         'status': True,
@@ -90,14 +86,14 @@ def info():
     tp = request.form.get('type')
 
     if None in [id, tp]:
-        return err('fields missing')
+        return abort(400, 'fields missing')
 
     try:
         id = int(id)
         tp = int(tp)
     except Exception as e:
         print(e)
-        return err('Invalid id or type.')
+        return abort(400, 'Invalid id or type.')
 
     result = None
     if tp == 0:  # skin
@@ -105,17 +101,17 @@ def info():
             result = SkinDisease.query.get(id).text
         except Exception as e:
             print(e)
-            return err(500, "couldn't get the disease info")
+            return abort(500, "couldn't get the disease info")
 
     if tp == 1:  # lung
         try:
             result = LungDisease.query.get(id).text
         except Exception as e:
             print(e)
-            return err("couldn't get the disease info")
+            return abort(500, "couldn't get the disease info")
 
     if result is None:
-        return err(f"type {tp} does't exist")
+        return abort(400, f"type {tp} does't exist")
 
     response = {
         'status': True,
@@ -126,8 +122,10 @@ def info():
 
     return jsonify(response)
 
-
+## SIGNUP AND LOGIN START ##
 # signup
+
+
 @app.post('/signup')
 def signup():
     email = request.form.get('email', None)
@@ -140,19 +138,19 @@ def signup():
     field_id = request.form.get('field_id', None)
 
     if None in [email, password, full_name]:
-        return err("fields missing")
+        return abort(400, "fields missing")
 
     if is_doctor and field_id is None:
-        return err('A doctor without a field')
+        return abort(400, 'A doctor without a field')
 
     if is_doctor:
         try:
             field_id = int(field_id)
         except Exception:
-            return err('Invalid field id')
+            return abort(400, 'Invalid field id')
 
     if len(password) < 8:
-        return err('A password can not be shorter than 8 characters')
+        return abort(400, 'A password can not be shorter than 8 characters')
 
     if is_doctor:
         success, token = create_user({
@@ -170,7 +168,7 @@ def signup():
         })
 
     if not success:
-        return err('Failed to add the user. Make sure the email has not been used before')
+        return abort(409, 'Failed to add the user. Make sure the email has not been used before')
 
     return jsonify({
         'status': True,
@@ -180,17 +178,18 @@ def signup():
 
 # login
 
+
 @app.post('/login')
 def login():
     email = request.form.get('email', None)
     password = request.form.get('password', None)
 
     if None in [email, password]:
-        return err("fields missing")
+        return avort(400, "fields missing")
 
     success, token, user = user_login(email, password)
     if not success:
-        return err('Invalid Credentials')
+        return abort(401, 'Invalid Credentials')
 
     return jsonify({
         'status': True,
@@ -198,6 +197,105 @@ def login():
         'token': token,
         'user': user
     })
+## SIGNUP AND LOGIN END ##
+
+# get fields
+
+
+@app.get('/fields')
+def get_fields():
+    authenticate()
+    return {
+        'status': True,
+        'data': {
+            'fields': FIELDS
+        }
+    }
+
+
+## POSTS AREA START ##
+# create a post
+@app.post('/posts')
+def create_post():
+    payload = authenticate()
+    user_id = payload['user_id']
+
+    title = request.form.get('title')
+    desc = request.form.get('desc')
+    field_id = request.form.get('field_id')
+    img = request.files.get('img')
+
+    if None in [title, desc, field_id]:
+        abort(400, 'fields missing')
+
+    try:
+        field_id = int(field_id)
+    except Exception:
+        abort(400, 'field_id must be an integer')
+
+    if field_id < 1 or field_id > 29:
+        abort(400, 'field_id must be between 1 and 29')
+
+    img_string = None
+    if img:
+        img_string = base64.b64encode(img.read()).decode()
+
+    try:
+        post = Post(
+            title=title,
+            desc=desc,
+            field_id=field_id,
+            user_id=user_id,
+            img=img_string
+        )
+        db.session.add(post)
+        db.session.commit()
+    except Exception as e:
+        print(str(e))
+        db.session.rollback()
+        abort(500, 'failed to create the post')
+
+    return {
+        'status': True,
+        'post_id': post.id
+    }
+
+
+# get posts
+
+
+@app.get('/posts')
+def get_posts():
+    pass
+
+# get a single post
+
+
+@app.get('/posts/<post_id>')
+def get_post(post_id):
+    pass
+
+# create a comment
+
+
+@app.post('/posts/<post_id>/comments')
+def create_comment(post_id):
+    pass
+
+# get the comments of a post
+
+
+@app.get('/posts/<post_id>/comments')
+def get_comments(post_id):
+    pass
+
+# close a post (got an answer)
+
+
+@app.post('/posts/<post_id>/end')
+def end_post(post_id):
+    pass
+## POSTS AREA END ##
 
 
 # root
@@ -206,9 +304,42 @@ def index():
     return 'The API is running'
 
 
+# error handelers
+@app.errorhandler(400)
+def bad_request_handeler(error):
+    return jsonify({
+        'status': False,
+        'error': error.description
+    }), 200
+
+
+@app.errorhandler(401)
+def forbidden_handeler(error):
+    return jsonify({
+        'status': False,
+        'error': error.description
+    }), 200
+
+
+@app.errorhandler(409)
+def forbidden_handeler(error):
+    return jsonify({
+        'status': False,
+        'error': error.description
+    }), 200
+
+
+@app.errorhandler(422)
+def unprocessable_handeler(error):
+    return jsonify({
+        'status': False,
+        'error': error.description
+    }), 200
+
+
 @app.errorhandler(500)
 def server_error_handeler(error):
     return jsonify({
         'status': False,
         'error': error.description
-    }), 500
+    }), 200
