@@ -329,8 +329,42 @@ def get_post(post_id):
 
 @app.post('/posts/<post_id>/comments')
 def create_comment(post_id):
-    # TODO
-    pass
+    payload = authenticate()
+    user_id = payload['user_id']
+
+    text = request.form.get('text')
+    img = request.files.get('img')
+
+    if None in [text, post_id]:
+        abort(400, 'fields missing')
+
+    try:
+        post_id = int(post_id)
+    except Exception:
+        abort(400, 'post_id must be an integer')
+
+    img_string = None
+    if img:
+        img_string = base64.b64encode(img.read()).decode()
+
+    try:
+        comment = Comment(
+            text=text,
+            post_id=post_id,
+            user_id=user_id,
+            img=img_string
+        )
+        db.session.add(comment)
+        db.session.commit()
+    except Exception as e:
+        print(str(e))
+        db.session.rollback()
+        abort(500, 'failed to create the comment')
+
+    return {
+        'status': True,
+        'comment_id': comment.id
+    }
 
 # get the comments of a post
 
