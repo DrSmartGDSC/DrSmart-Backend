@@ -403,7 +403,7 @@ def get_comments(post_id):
             'text': x.text,
             'img': x.img,
             'user': {
-                'name': x.user.name,
+                'name': x.user.full_name,
                 'email': x.user.email
             }
         }, comments.items))
