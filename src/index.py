@@ -273,8 +273,11 @@ def get_posts():
     field_id = payload['field_id']
     user_id = payload['user_id']
 
-    limit = request.form.get('limit', 10)
-    page = request.form.get('page', 1)
+    try:
+        limit = int(request.form.get('limit', 10))
+        page = int(request.form.get('page', 1))
+    except:
+        abort(400, 'make sure you are passing int')
 
     if is_doctor:
         posts = Post.query.order_by(Post.id.desc()).filter(
