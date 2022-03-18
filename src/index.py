@@ -291,7 +291,8 @@ def get_posts():
             'title': x.title,
             'desc': x.desc,
             'field': x.field.name,
-            'answered': x.answered
+            'answered': x.answered,
+            'img': x.img
         }, posts.items))
 
     return {
