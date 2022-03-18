@@ -395,7 +395,7 @@ def get_comments(post_id):
     except Exception:
         abort(400, 'post_id must be an integer')
 
-    comments = Post.query.order_by(Comment.id.desc()).filter(
+    comments = Comment.query.order_by(Comment.id.desc()).filter(
         Comment.post_id == post_id).paginate(page, limit, error_out=False)
 
     comments = list(
