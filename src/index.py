@@ -278,13 +278,20 @@ def get_posts():
 
     if is_doctor:
         posts = Post.query.order_by(Post.id.desc()).filter(
-            Post.field_id == field_id).paginate(page, limit, error_out=False)
+            Post.field_id == field_id, Post.answered == False).paginate(page, limit, error_out=False)
     else:
         posts = Post.query.order_by(Post.id.desc()).filter(
             Post.user_id == user_id).paginate(page, limit, error_out=False)
 
     posts = list(
-        map(lambda x: {'post_id': x.id, 'title': x.title, 'desc': x.desc, 'field': x.field.name}, posts.items))
+        map(lambda x: {
+            'post_id': x.id,
+            'title': x.title,
+            'desc': x.desc,
+            'field': x.field.name,
+            'answered': x.answered
+        }, posts.items))
+
     return {
         'status': True,
         'data': {
@@ -299,6 +306,7 @@ def get_posts():
 def get_post(post_id):
     authenticate()
     try:
+        post_id = int(post_id)
         post = Post.query.get(post_id)
         if post is None:
             raise Exception('post not found')
@@ -371,16 +379,63 @@ def create_comment(post_id):
 
 @app.get('/posts/<post_id>/comments')
 def get_comments(post_id):
-    # TODO
-    pass
+    payload = authenticate()
+
+    limit = request.form.get('limit', 10)
+    page = request.form.get('page', 1)
+
+    try:
+        post_id = int(post_id)
+    except Exception:
+        abort(400, 'post_id must be an integer')
+
+    comments = Post.query.order_by(Comment.id.desc()).filter(
+        Comment.post_id == post_id).paginate(page, limit, error_out=False)
+
+    comments = list(
+        map(lambda x: {
+            'text': x.text,
+            'img': x.img,
+            'user': {
+                'name': x.user.name,
+                'email': x.user.email
+            }
+        }, comments.items))
+
+    return {
+        'status': True,
+        'data': {
+            'comments': comments
+        }
+    }
 
 # close a post (got an answer)
 
 
 @app.post('/posts/<post_id>/end')
 def end_post(post_id):
-    # TODO
-    pass
+    authenticate()
+    try:
+        post_id = int(post_id)
+        post = Post.query.get(post_id)
+        if post is None:
+            raise Exception('post not found')
+    except Exception as e:
+        print(str(e))
+        abort(404, 'post not found')
+
+    try:
+        post.answered = True
+        db.session.commit()
+    except:
+        db.session.rollback()
+        abort(500, 'some error happened')
+
+    return {
+        'status': True,
+        'post_id': post.id
+    }
+
 ## POSTS AREA END ##
 
 

@@ -66,8 +66,10 @@ class Post(db.Model):
     title = db.Column(db.String(128), nullable=False)
     desc = db.Column(db.String(1024))
     img = db.Column(db.Text)  # base64
+    answered = db.Column(db.Boolean, default=False, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    field_id = db.Column(db.Integer, db.ForeignKey('fields.id'), nullable=False)
+    field_id = db.Column(db.Integer, db.ForeignKey(
+        'fields.id'), nullable=False)
 
     user = db.relationship('User')
     field = db.relationship('Field')
