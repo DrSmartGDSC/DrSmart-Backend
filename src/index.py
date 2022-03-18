@@ -381,8 +381,11 @@ def create_comment(post_id):
 def get_comments(post_id):
     payload = authenticate()
 
-    limit = request.form.get('limit', 10)
-    page = request.form.get('page', 1)
+    try:
+        limit = int(request.form.get('limit', 10))
+        page = int(request.form.get('page', 1))
+    except:
+        abort(400 ,'make sure you are passing int')
 
     try:
         post_id = int(post_id)
