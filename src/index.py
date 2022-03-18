@@ -206,7 +206,6 @@ def login():
 
 @app.get('/fields')
 def get_fields():
-    authenticate()
     return {
         'status': True,
         'data': {
