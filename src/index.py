@@ -292,7 +292,8 @@ def get_posts():
             'desc': x.desc,
             'field': x.field.name,
             'answered': x.answered,
-            'img': x.img
+            'img': x.img,
+            'user_name': x.user.full_name
         }, posts.items))
 
     return {
@@ -327,6 +328,7 @@ def get_post(post_id):
                 'user_id': post.user_id,
                 'field_id': post.field_id,
                 'field': post.field.name,
+                'user_name': post.user.full_name
             }
         }
     }
@@ -399,7 +401,8 @@ def get_comments(post_id):
             'text': x.text,
             'img': x.img,
             'user_id': x.user_id,
-            'comment_id': x.id
+            'comment_id': x.id,
+            'user_name': x.user.full_name
         }, comments.items))
 
     return {
