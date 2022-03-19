@@ -327,10 +327,6 @@ def get_post(post_id):
                 'user_id': post.user_id,
                 'field_id': post.field_id,
                 'field': post.field.name,
-                'user': {
-                    'name': post.user.full_name,
-                    'email': post.user.email
-                }
             }
         }
     }
@@ -402,10 +398,8 @@ def get_comments(post_id):
         map(lambda x: {
             'text': x.text,
             'img': x.img,
-            'user': {
-                'name': x.user.full_name,
-                'email': x.user.email
-            }
+            'user_id': x.user_id,
+            'comment_id': x.id
         }, comments.items))
 
     return {
