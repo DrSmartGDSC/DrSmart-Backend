@@ -63,7 +63,6 @@ class Post(db.Model):
     __tablename__ = 'posts'
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(128), nullable=False)
     desc = db.Column(db.String(1024))
     img = db.Column(db.Text)  # base64
     answered = db.Column(db.Boolean, default=False, nullable=False)

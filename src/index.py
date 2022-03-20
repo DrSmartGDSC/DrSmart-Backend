@@ -221,12 +221,11 @@ def create_post():
     payload = authenticate()
     user_id = payload['user_id']
 
-    title = request.form.get('title')
     desc = request.form.get('desc')
     field_id = request.form.get('field_id')
     img = request.files.get('img')
 
-    if None in [title, desc, field_id]:
+    if None in [desc, field_id]:
         abort(400, 'fields missing')
 
     try:
@@ -243,7 +242,6 @@ def create_post():
 
     try:
         post = Post(
-            title=title,
             desc=desc,
             field_id=field_id,
             user_id=user_id,
@@ -288,7 +286,6 @@ def get_posts():
     posts = list(
         map(lambda x: {
             'post_id': x.id,
-            'title': x.title,
             'desc': x.desc,
             'field': x.field.name,
             'answered': x.answered,
@@ -322,7 +319,6 @@ def get_post(post_id):
         'status': True,
         'data': {
             'post': {
-                'title': post.title,
                 'desc': post.desc,
                 'img': post.img,
                 'user_id': post.user_id,
