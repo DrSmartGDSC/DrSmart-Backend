@@ -83,8 +83,8 @@ def predict_skin():
 @app.get('/info')
 def info():
     authenticate()
-    id = request.form.get('id')
-    tp = request.form.get('type')
+    id = request.args.get('id')
+    tp = request.args.get('type')
 
     if None in [id, tp]:
         return abort(400, 'fields missing')
