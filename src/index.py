@@ -271,8 +271,8 @@ def get_posts():
     user_id = payload['user_id']
 
     try:
-        limit = int(request.form.get('limit', 10))
-        page = int(request.form.get('page', 1))
+        limit = int(request.args.get('limit', 10))
+        page = int(request.args.get('page', 1))
     except:
         abort(400, 'make sure you are passing int')
 
