@@ -3,12 +3,12 @@ import dotenv
 dotenv.load_dotenv()
 
 if not os.path.isfile('skin_model.h5'):
-        os.system('sh ../sh/downloadSkinModel.sh')
+        os.system('sh sh/downloadSkinModel.sh')
 
 if not os.path.isfile('lung_model.h5'):
-        os.system('sh ../sh/downloadLungModel.sh')
+        os.system('sh sh/downloadLungModel.sh')
 
-from index import app
+from src.index import app
 # run 
 if __name__ == '__main__': 
         app.run()

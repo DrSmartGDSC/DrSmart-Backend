@@ -12,7 +12,7 @@ import tensorflow as tf
 from tensorflow.keras import models, layers
 import matplotlib.pyplot as plt
 from tensorflow import keras
-from models import SkinDisease, LungDisease
+from .models import SkinDisease, LungDisease
 
 skin_class_names = None
 # class_names =['Acne and Rosacea Photos',

@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, abort
-from models import *
-from auth import create_user, user_login, validate_access_token
-from predict import predict_s, getSkinClasses, predict_l, getLungClasses
+from .models import *
+from .auth import create_user, user_login, validate_access_token
+from .predict import predict_s, getSkinClasses, predict_l, getLungClasses
 import os
 import base64
 

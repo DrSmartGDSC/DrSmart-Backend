@@ -10,6 +10,4 @@ RUN pip install -r requirements.txt
 
 EXPOSE $PORT
 
-WORKDIR src
-
 CMD waitress-serve --port=$PORT run:app

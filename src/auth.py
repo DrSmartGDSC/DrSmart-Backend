@@ -2,7 +2,7 @@ from time import time, timezone
 import jwt
 import os
 from datetime import datetime, timezone, timedelta
-from models import db, User
+from .models import db, User
 import hashlib
 
 ACCESS_SECRET = os.environ.get('ACCESS_SECRET')
