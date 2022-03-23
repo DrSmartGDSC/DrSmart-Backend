@@ -366,16 +366,29 @@ def create_comment(post_id):
     except Exception:
         abort(400, 'post_id must be an integer')
 
-    img_string = None
+    img_url = None
     if img:
-        img_string = base64.b64encode(img.read()).decode()
+        # Create a Cloud Storage client.
+        storage_client = storage.Client()
+
+        # Get the bucket that the file will be uploaded to.
+        bucket = storage_client.get_bucket(CLOUD_STORAGE_BUCKET)
+
+        # Create a new blob and upload the file's content.
+        blob = bucket.blob(str(user_id) + img.filename)
+        blob.upload_from_string(img.read(), content_type=img.content_type)
+
+        # Make the blob publicly viewable.
+        blob.make_public()
+
+        img_url = blob.public_url
 
     try:
         comment = Comment(
             text=text,
             post_id=post_id,
             user_id=user_id,
-            img=img_string
+            img=img_url
         )
         db.session.add(comment)
         db.session.commit()
