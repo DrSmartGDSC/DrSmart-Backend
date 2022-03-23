@@ -249,8 +249,8 @@ def create_post():
         bucket = storage_client.get_bucket(CLOUD_STORAGE_BUCKET)
 
         # Create a new blob and upload the file's content.
-        blob = bucket.blob(str(user_id) + photo.filename)
-        blob.upload_from_string(photo.read(), content_type=photo.content_type)
+        blob = bucket.blob(str(user_id) + img.filename)
+        blob.upload_from_string(img.read(), content_type=img.content_type)
 
         # Make the blob publicly viewable.
         blob.make_public()
