@@ -290,7 +290,8 @@ def get_posts():
             'field': x.field.name,
             'answered': x.answered,
             'img': x.img,
-            'user_name': x.user.full_name
+            'user_name': x.user.full_name,
+            'user_id': x.user.id
         }, posts.items))
 
     return {
