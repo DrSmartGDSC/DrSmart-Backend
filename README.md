@@ -1,5 +1,5 @@
 # DR.Smart Backend API
-This is backend of the Dr.Smart app. The API processes images for diagnoses and manges the database.
+This is the backend of the Dr.Smart app. The API processes images for diagnoses and manges the database.
 
 # Install
 1. First there are some environemt vaiables you need. you will find them in `.env.template.txt`
