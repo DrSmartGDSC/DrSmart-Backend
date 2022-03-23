@@ -33,11 +33,11 @@ field_id : int
 ### Response
 ```json
 {
-    "status": true | false,
+    "status": true,
     "email": "email",
     "token": "token",
     "user": {
-        "is_doctor": true | false,
+        "is_doctor": true,
         "field_id": 1,
         "name": "name"
     }
@@ -55,11 +55,11 @@ password : string
 ### Response
 ```json
 {
-    "status": true | false,
+    "status": true,
     "email": "email",
     "token": "token",
     "user": {
-        "is_doctor": true | false,
+        "is_doctor": true,
         "field_id": 1,
         "name": "name"
     }
@@ -71,7 +71,7 @@ password : string
 ### Response
 ```json
 {
-    "status": true | false,
+    "status": true,
     "data": {
         "fields": [
             {
@@ -95,7 +95,7 @@ type : int (0 == skin, 1 == lung)
 ### Response
 ```json
 {
-    "status": true | false,
+    "status": true,
     "data": {
         "fields": [
             {
@@ -144,7 +144,7 @@ page : int (default = 1)
 ### Response
 ```json
 {
-    "status": true | false,
+    "status": true,
     "data": {
         "posts": [
             {
@@ -167,7 +167,7 @@ page : int (default = 1)
 ### Response
 ```json
 {
-    "status": true | false,
+    "status": true,
     "data": {
         "post": 
             {
@@ -195,7 +195,7 @@ page : int (default = 1)
 ### Response
 ```json
 {
-    "status": true | false,
+    "status": true,
     "data": {
         "comments": [
             {
@@ -223,7 +223,7 @@ img: image file (optional)
 ### Response
 ```json
 {
-    "status": true | false,
+    "status": true,
     "post_id": 6
 }
 ```
@@ -240,7 +240,7 @@ img: image file (optional)
 ### Response
 ```json
 {
-    "status": true | false,
+    "status": true,
     "comment_id": 15
 }
 ```
@@ -251,7 +251,7 @@ img: image file (optional)
 ### Response
 ```json
 {
-    "status": true | false,
+    "status": true,
     "post_id": 6
 }
 ```
