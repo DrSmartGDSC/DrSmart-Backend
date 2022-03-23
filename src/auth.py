@@ -51,6 +51,7 @@ def create_user(user_data):
         u = dict()
         u['is_doctor'] = user.is_doctor
         u['field_id'] = user.field_id
+        u['user_id'] = user.id
         u['name'] = user.full_name
 
         db.session.commit()
@@ -76,6 +77,7 @@ def user_login(email, password):
         u = dict()
         u['is_doctor'] = user.is_doctor
         u['field_id'] = user.field_id
+        u['user_id'] = user.id
         u['name'] = user.full_name
 
         token = create_access_token({
