@@ -4,6 +4,7 @@ from .auth import create_user, user_login, validate_access_token
 from .predict import predict_s, getSkinClasses, predict_l, getLungClasses
 import os
 import base64
+from google.cloud import storage
 
 # Config
 app = Flask('SDD API')
@@ -13,6 +14,8 @@ init_db(app)
 getSkinClasses(app)
 getLungClasses(app)
 
+
+CLOUD_STORAGE_BUCKET = os.environ.get("CLOUD_STORAGE_BUCKET")
 with app.app_context():
     FIELDS = list(
         map(lambda x: {'name': x.name, 'id': x.id}, Field.query.all()))
@@ -236,16 +239,30 @@ def create_post():
     if field_id < 1 or field_id > 29:
         abort(400, 'field_id must be between 1 and 29')
 
-    img_string = None
+
+    img_url = None
     if img:
-        img_string = base64.b64encode(img.read()).decode()
+        # Create a Cloud Storage client.
+        storage_client = storage.Client()
+
+        # Get the bucket that the file will be uploaded to.
+        bucket = storage_client.get_bucket(CLOUD_STORAGE_BUCKET)
+
+        # Create a new blob and upload the file's content.
+        blob = bucket.blob(str(user_id) + photo.filename)
+        blob.upload_from_string(photo.read(), content_type=photo.content_type)
+
+        # Make the blob publicly viewable.
+        blob.make_public()
+
+        img_url = blob.public_url
 
     try:
         post = Post(
             desc=desc,
             field_id=field_id,
             user_id=user_id,
-            img=img_string
+            img=img_url
         )
         db.session.add(post)
         db.session.commit()
@@ -383,7 +400,7 @@ def get_comments(post_id):
         limit = int(request.form.get('limit', 10))
         page = int(request.form.get('page', 1))
     except:
-        abort(400 ,'make sure you are passing int')
+        abort(400, 'make sure you are passing int')
 
     try:
         post_id = int(post_id)

@@ -1,3 +1,5 @@
+google-cloud-storage==2.0.0; python_version < '3.7'
+google-cloud-storage==2.1.0; python_version > '3.6'
 gunicorn
 absl-py
 alembic
