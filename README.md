@@ -12,7 +12,7 @@ pip install -r requirements.txt
 python run.py
 ```
 
-If you added the `SKIN_MODEL_ID`, and `LUNG_MODEL_ID` env vars, the models will get downloaded, then the app will start. If you didn't add them, and didn't downloaded the models, then the app will probably crash.
+If you added the `SKIN_MODEL_ID`, and `LUNG_MODEL_ID` env vars, the models will get downloaded, then the app will start. If you didn't add them, and didn't download the models, then the app will probably crash.
 
 The `SKIN_MODEL_ID`, and the `LUNG_MODEL_ID` are the IDs of the tensorflow models on Google Drive.
 
