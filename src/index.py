@@ -5,6 +5,7 @@ from .predict import predict_s, getSkinClasses, predict_l, getLungClasses
 import os
 import base64
 from google.cloud import storage
+from datetime import datetime
 
 # Config
 app = Flask('SDD API')
@@ -249,7 +250,7 @@ def create_post():
         bucket = storage_client.get_bucket(CLOUD_STORAGE_BUCKET)
 
         # Create a new blob and upload the file's content.
-        blob = bucket.blob(str(user_id) + img.filename)
+        blob = bucket.blob(str(user_id) + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') + img.filename)
         blob.upload_from_string(img.read(), content_type=img.content_type)
 
         # Make the blob publicly viewable.
@@ -375,7 +376,7 @@ def create_comment(post_id):
         bucket = storage_client.get_bucket(CLOUD_STORAGE_BUCKET)
 
         # Create a new blob and upload the file's content.
-        blob = bucket.blob(str(user_id) + img.filename)
+        blob = bucket.blob(str(user_id) + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') + img.filename)
         blob.upload_from_string(img.read(), content_type=img.content_type)
 
         # Make the blob publicly viewable.
