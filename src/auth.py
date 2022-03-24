@@ -5,14 +5,18 @@ from datetime import datetime, timezone, timedelta
 from .models import db, User
 import hashlib
 
+
+# the secrect for creating access JWT tokens
 ACCESS_SECRET = os.environ.get('ACCESS_SECRET')
 
 
+# for hashing passwords in sha256
 def hashText(txt):
     return hashlib.sha256(txt.encode()).hexdigest()
 
 
 def create_access_token(payload):
+    # expires after 30 days
     payload['exp'] = datetime.now(tz=timezone.utc) + timedelta(days=30)
 
     token = jwt.encode(payload,  ACCESS_SECRET, algorithm='HS256')

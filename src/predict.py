@@ -14,28 +14,19 @@ import matplotlib.pyplot as plt
 from tensorflow import keras
 from .models import SkinDisease, LungDisease
 
+# the class names get downloaded from the databases when the app starts
 skin_class_names = None
-# class_names =['Acne and Rosacea Photos',
-# 'Actinic Keratosis Basal Cell Carcinoma and other Malignant Lesions',
-# 'Atopic Dermatitis Photos',
-# 'Cellulitis Impetigo and other Bacterial Infections',
-# 'Eczema Photos',
-# 'Lupus and other Connective Tissue diseases',
-# 'Melanoma Skin Cancer Nevi and Moles',
-# 'Nail Fungus and other Nail Disease',
-# 'Poison Ivy Photos and other Contact Dermatitis',
-# 'Psoriasis pictures Lichen Planus and related diseases',
-# 'Tinea Ringworm Candidiasis and other Fungal Infections',
-# 'Urticaria Hives',
-# 'Warts Molluscum and other Viral Infections']
 lung_class_names = None
 
+# for the skin model
 image_size = 128
 
+# loading the models
 skin_model = keras.models.load_model('skin_model.h5')  # Model Path .h5
 lung_model = keras.models.load_model('lung_model.h5')  # Model Path .h5
 
 
+# for getting the classes from the db
 def getSkinClasses(app):
     global skin_class_names
     with app.app_context():
@@ -47,11 +38,10 @@ def getLungClasses(app):
         lung_class_names = {c.name: c.id for c in LungDisease.query.order_by(LungDisease.id).all()}
 
 
-
+# predict skin
 def predict_s(img):
-    arr = plt.imread(img, 0)  # image path don't forget 0
-
-    # image size  don't play in it
+    arr = plt.imread(img, 0)
+    
     n = tf.image.resize(arr, (image_size, image_size))
 
     img_array = tf.keras.preprocessing.image.img_to_array(n.numpy())
@@ -77,12 +67,13 @@ def predict_s(img):
 
     return result
 
+
+# predict lung
 def predict_l(img):
     class_names = lung_class_names
     
-    arr = plt.imread(img, 0)  # image path don't forget 0
+    arr = plt.imread(img, 0)
 
-    # image size  don't play in it
     n = tf.image.resize(arr, (224, 224))
 
     img_array = tf.keras.preprocessing.image.img_to_array(n.numpy())

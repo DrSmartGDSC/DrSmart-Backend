@@ -23,8 +23,6 @@ with app.app_context():
 
 
 # check the access token
-
-
 def authenticate():
     if 'Authorization' not in request.headers:
         return abort(400, 'Missing the Authorization header')
@@ -33,25 +31,28 @@ def authenticate():
     if len(sp) != 2:
         return abort(401, 'Invalid Authorization header')
 
-    token = sp[1]
-    payload = validate_access_token(token)
+    token = sp[1] # the token side
+    payload = validate_access_token(token) # False if invalid
 
     if not payload:
         return abort(401, 'Invalid access token')
 
     return payload
 
-# Endpoints
+
+## Endpoints ##
+
+
 # skin
-
-
 @app.post('/predict')
 def predict_skin():
     authenticate()
 
+    # taking input
     img = request.files.get('img')
     tp = request.form.get('type')
 
+    # validation
     if img is None:
         return abort(400, 'img is missing')
     if tp is None:
@@ -61,7 +62,8 @@ def predict_skin():
         tp = int(tp)
     except Exception:
         return abort(400, f'invalid type ({tp})')
-
+    
+    # sanning the the image
     result = None
     if tp == 0:  # skin
         result = predict_s(img)
@@ -83,13 +85,16 @@ def predict_skin():
 
     return jsonify(response)
 
-
+# info about each disease
 @app.get('/info')
 def info():
     authenticate()
+
+    # input
     id = request.args.get('id')
     tp = request.args.get('type')
 
+    # validate
     if None in [id, tp]:
         return abort(400, 'fields missing')
 
@@ -100,6 +105,7 @@ def info():
         print(e)
         return abort(400, 'Invalid id or type.')
 
+    # get the info
     result = None
     if tp == 0:  # skin
         try:
@@ -127,12 +133,14 @@ def info():
 
     return jsonify(response)
 
-## SIGNUP AND LOGIN START ##
+
+## SIGNUP AND LOGIN ##
+
+
 # signup
-
-
 @app.post('/signup')
 def signup():
+    # input
     email = request.form.get('email', None)
     password = request.form.get('password', None)
     full_name = request.form.get('full_name', None)
@@ -142,6 +150,7 @@ def signup():
 
     field_id = request.form.get('field_id', None)
 
+    # validate
     if None in [email, password, full_name]:
         return abort(400, "fields missing")
 
@@ -157,6 +166,8 @@ def signup():
     if len(password) < 8:
         return abort(400, 'A password can not be shorter than 8 characters')
 
+
+    # create the user
     if is_doctor:
         success, token, user = create_user({
             'email': email,
@@ -183,16 +194,17 @@ def signup():
     })
 
 # login
-
-
 @app.post('/login')
 def login():
+    # input
     email = request.form.get('email', None)
     password = request.form.get('password', None)
 
+    # validate
     if None in [email, password]:
         return avort(400, "fields missing")
 
+    # login
     success, token, user = user_login(email, password)
     if not success:
         return abort(401, 'Invalid Credentials')
@@ -203,11 +215,10 @@ def login():
         'token': token,
         'user': user
     })
-## SIGNUP AND LOGIN END ##
+
+
 
 # get fields
-
-
 @app.get('/fields')
 def get_fields():
     return {
@@ -218,17 +229,22 @@ def get_fields():
     }
 
 
-## POSTS AREA START ##
+
+## POSTS ##
+
+
 # create a post
 @app.post('/posts')
 def create_post():
     payload = authenticate()
+    # input
     user_id = payload['user_id']
 
     desc = request.form.get('desc')
     field_id = request.form.get('field_id')
     img = request.files.get('img')
 
+    # validate
     if None in [desc, field_id]:
         abort(400, 'fields missing')
 
@@ -240,7 +256,7 @@ def create_post():
     if field_id < 1 or field_id > 29:
         abort(400, 'field_id must be between 1 and 29')
 
-
+    # store the image on Google Storage
     img_url = None
     if img:
         # Create a Cloud Storage client.
@@ -250,7 +266,8 @@ def create_post():
         bucket = storage_client.get_bucket(CLOUD_STORAGE_BUCKET)
 
         # Create a new blob and upload the file's content.
-        blob = bucket.blob(str(user_id) + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') + img.filename)
+        blob = bucket.blob(
+            str(user_id) + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') + img.filename)
         blob.upload_from_string(img.read(), content_type=img.content_type)
 
         # Make the blob publicly viewable.
@@ -258,6 +275,7 @@ def create_post():
 
         img_url = blob.public_url
 
+    # create the post
     try:
         post = Post(
             desc=desc,
@@ -279,21 +297,23 @@ def create_post():
 
 
 # get posts
-
-
 @app.get('/posts')
 def get_posts():
     payload = authenticate()
+
+    # input
     is_doctor = payload['is_doctor']
     field_id = payload['field_id']
     user_id = payload['user_id']
 
+    # validate
     try:
         limit = int(request.args.get('limit', 10))
         page = int(request.args.get('page', 1))
     except:
         abort(400, 'make sure you are passing int')
 
+    # get the posts
     if is_doctor:
         posts = Post.query.order_by(Post.id.desc()).filter(
             Post.field_id == field_id, Post.answered == False).paginate(page, limit, error_out=False)
@@ -301,6 +321,7 @@ def get_posts():
         posts = Post.query.order_by(Post.id.desc()).filter(
             Post.user_id == user_id).paginate(page, limit, error_out=False)
 
+    # turn the posts into a list of dictionaries
     posts = list(
         map(lambda x: {
             'post_id': x.id,
@@ -319,12 +340,14 @@ def get_posts():
         }
     }
 
+
+
 # get a single post
-
-
 @app.get('/posts/<post_id>')
 def get_post(post_id):
     authenticate()
+
+    # input
     try:
         post_id = int(post_id)
         post = Post.query.get(post_id)
@@ -334,6 +357,7 @@ def get_post(post_id):
         print(str(e))
         abort(404, 'post not found')
 
+    # return the post info
     return {
         'status': True,
         'data': {
@@ -348,17 +372,20 @@ def get_post(post_id):
         }
     }
 
+
+
 # create a comment
-
-
 @app.post('/posts/<post_id>/comments')
 def create_comment(post_id):
     payload = authenticate()
+    
+    # input
     user_id = payload['user_id']
 
     text = request.form.get('text')
     img = request.files.get('img')
 
+    # validate
     if None in [text, post_id]:
         abort(400, 'fields missing')
 
@@ -367,6 +394,7 @@ def create_comment(post_id):
     except Exception:
         abort(400, 'post_id must be an integer')
 
+    # store the image on Google Storage
     img_url = None
     if img:
         # Create a Cloud Storage client.
@@ -376,7 +404,8 @@ def create_comment(post_id):
         bucket = storage_client.get_bucket(CLOUD_STORAGE_BUCKET)
 
         # Create a new blob and upload the file's content.
-        blob = bucket.blob(str(user_id) + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') + img.filename)
+        blob = bucket.blob(
+            str(user_id) + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') + img.filename)
         blob.upload_from_string(img.read(), content_type=img.content_type)
 
         # Make the blob publicly viewable.
@@ -384,6 +413,7 @@ def create_comment(post_id):
 
         img_url = blob.public_url
 
+    # create the comment
     try:
         comment = Comment(
             text=text,
@@ -403,13 +433,14 @@ def create_comment(post_id):
         'comment_id': comment.id
     }
 
+
+
 # get the comments of a post
-
-
 @app.get('/posts/<post_id>/comments')
 def get_comments(post_id):
     payload = authenticate()
 
+    # input
     try:
         limit = int(request.form.get('limit', 10))
         page = int(request.form.get('page', 1))
@@ -421,9 +452,11 @@ def get_comments(post_id):
     except Exception:
         abort(400, 'post_id must be an integer')
 
+    # get the comments
     comments = Comment.query.order_by(Comment.id.desc()).filter(
         Comment.post_id == post_id).paginate(page, limit, error_out=False)
 
+    # turn into dictionaries
     comments = list(
         map(lambda x: {
             'text': x.text,
@@ -440,12 +473,14 @@ def get_comments(post_id):
         }
     }
 
+
 # close a post (got an answer)
-
-
+# they all return 200
 @app.post('/posts/<post_id>/end')
 def end_post(post_id):
     authenticate()
+
+    # input
     try:
         post_id = int(post_id)
         post = Post.query.get(post_id)
@@ -455,6 +490,7 @@ def end_post(post_id):
         print(str(e))
         abort(404, 'post not found')
 
+    # mark the post as answered
     try:
         post.answered = True
         db.session.commit()
@@ -467,13 +503,12 @@ def end_post(post_id):
         'post_id': post.id
     }
 
-## POSTS AREA END ##
 
-
-# root
+# just to check if the api is running
 @app.get('/')
 def index():
     return 'The API is running'
+
 
 
 # error handelers
